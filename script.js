@@ -1,5 +1,5 @@
 // index.html을 열어서 agoraStatesDiscussions 배열 요소를 확인하세요.
-//console.log(agoraStatesDiscussions);
+
 
 //중간에 큰 화살표 클릭시 없어지고 답변보기박스가 나오는 동작
 const arrow__right = document.querySelector("#arrow-right");
@@ -11,7 +11,12 @@ function arrowRightClick(){
 arrow__right.addEventListener("click", arrowRightClick);
 
 
-
+//html에 부여되있는 첫번째 li지움
+const liFirst = document.querySelector("#li-first");
+const container = document.querySelector(".discussion__container");
+const li = document.querySelector("li");
+li.classList.add = "show";
+liFirst.remove();
 
 
 //다크모드 토글을 위한 DOM
@@ -24,28 +29,38 @@ const container__box = document.querySelector('.container__box');
 const questionbox = document.querySelector('.question');
 const answerbox = document.querySelector('#question');
 const discussion__wrapperbox = document.querySelector('.discussion__wrapper');
-const pagibox = document.querySelectorAll('.pagi');
-const page__numberbox = document.querySelectorAll('.page-number');
+//const pagibox = document.querySelectorAll('.pagi');
+//const page__numberbox = document.querySelectorAll('.page-number');
+const nameInput = document.querySelectorAll('#name');
+const textInput = document.querySelector('#story');
 
 //다크모드 토글
 var toggle = (function () {
   var isShow = false;
   return function () {
     arrowbox.style.color = isShow ? '#0071e3' : '#f5f5f7';
-    mainbox.style.backgroundColor = isShow ? '#f5f5f7' : 'black';
-    bodybox.style.backgroundColor = isShow ? '#f5f5f7' : 'black';
+    mainbox.style.backgroundColor = isShow ? '#f5f5f7' : 'rgba(0,0,0,0)';
+    bodybox.style.backgroundColor = isShow ? '#f5f5f7' : 'rgba(0,0,0,0.88)';
     maintitlebox.style.backgroundColor = isShow ? '#313132' : '#0071e3';
     container__box.style.backgroundColor = isShow ? '#f2f2f3' : 'rgba(0,0,0,0)';
     questionbox.style.color = isShow ? '#313132' : '#f5f5f7';
     discussion__wrapperbox.style.backgroundColor = isShow ? '#f2f2f3' : 'rgba(0,0,0,0)';
     answerbox.style.color = isShow ? '#313132' : '#f5f5f7';
-    pagibox[0].style.color = isShow ? '#313132' : 'white';
-    pagibox[1].style.color = isShow ? '#313132' : 'white';
-    page__numberbox[0].style.color = isShow ? '#313132' : 'white';
-    page__numberbox[1].style.color = isShow ? '#313132' : 'white';
-    page__numberbox[2].style.color = isShow ? '#313132' : 'white';
-    page__numberbox[3].style.color = isShow ? '#313132' : 'white';
-    page__numberbox[4].style.color = isShow ? '#313132' : 'white';
+    //pagibox[0].style.color = isShow ? '#313132' : 'white';
+    //pagibox[1].style.color = isShow ? '#313132' : 'white';
+    //page__numberbox[0].style.color = isShow ? '#313132' : 'white';
+    //page__numberbox[1].style.color = isShow ? '#313132' : 'white';
+    //page__numberbox[2].style.color = isShow ? '#313132' : 'white';
+    //page__numberbox[3].style.color = isShow ? '#313132' : 'white';
+    //page__numberbox[4].style.color = isShow ? '#313132' : 'white';
+    nameInput[0].style.color = isShow ? 'black' : 'white';
+    nameInput[1].style.color = isShow ? 'black' : 'white';
+    textInput.style.color = isShow ? 'black' : 'white';
+    textInput.style.borderColor = isShow ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.5)';
+    //discussionTitle.style.color = isShow ? 'black' : 'white';
+    isShow? textInput.classList.remove('storyPlaceholderClass'):textInput.classList.add('storyPlaceholderClass');
+    //isShow? q[0].classList.remove('discussion__contentColorChange'):q[0].classList.add('discussion__contentColorChange');
+    textInput.style.color = isShow ? 'black' : 'white';
     isShow = !isShow;
   };
 })();
@@ -54,13 +69,6 @@ var toggle = (function () {
 
 
 
-
-//html에 부여되있는 첫번째 li지움
-const liFirst = document.querySelector("#li-first");
-const container = document.querySelector(".discussion__container");
-const li = document.querySelector("li");
-li.classList.add = "show";
-liFirst.remove();
 
 // convertToDiscussion은 아고라 스테이츠 데이터를 DOM으로 바꿔줍니다.
 const convertToDiscussion = (obj) => {
@@ -95,7 +103,8 @@ const convertToDiscussion = (obj) => {
 //글쓴이와 시간
   const authorTime = document.createElement('div');
   authorTime.className = "discussion__information";
-  authorTime.textContent = obj.author + " / " + obj.createdAt;
+  let time = new Date(obj.createdAt).toLocaleDateString();
+  authorTime.textContent = obj.author + " / " + time;
   discussionContent.append(authorTime);
 
   //체크표시
@@ -105,235 +114,38 @@ const convertToDiscussion = (obj) => {
   //icon.className = "fas fa-caret-down";
   discussionAnswered.append(check);
   //check.append(icon);
-
+  
   li.append(avatarWrapper, discussionContent, discussionAnswered);
   li.classList.add("show");
-  
   return li;
 };
 
 
 // agoraStatesDiscussions 배열의 모든 데이터를 화면에 렌더링하는 함수입니다.
-const render = (element) => {
-  for (let i = 0; i < 5; i += 1) {
-    //liFirst.remove();
+
+let render = (element) => {
+  for (let i = 0; i < agoraStatesDiscussions.length; i += 1) {
     element.append(convertToDiscussion(agoraStatesDiscussions[i]));
+    
+    const searchFilter = agoraStatesDiscussions[i].title;
+    const searchInput = document.querySelector(".search_input"); //search입력element
+
+    const searchFilterFunc=(e) => {
+        if(searchFilter.includes(e.target.value)){ //"koans과제 진행 중 npm install"을 차례로 돈다.
+          element.prepend(convertToDiscussion(agoraStatesDiscussions[i]));
+        }
+        //convertToDiscussion(agoraStatesDiscussions[i]).style.display = "none";
+    }
+    searchInput.addEventListener("change", searchFilterFunc);
   }
   return;
 };
+
 // ul 요소에 agoraStatesDiscussions 배열의 모든 데이터를 화면에 렌더링합니다.
 const ul = document.querySelector("ul.discussions__container");
 render(ul);
 
 
-
-//페이지네이션을 위한 변수
-const arrowIconBefore = document.querySelector(".arrow-icon-before");
-const arrowIconNext = document.querySelector(".arrow-icon-next");
-const pageNumber1 = document.querySelector(".pageNumber1");
-const pageNumber2 = document.querySelector(".pageNumber2");
-const pageNumber3 = document.querySelector(".pageNumber3");
-const pageNumber4 = document.querySelector(".pageNumber4");
-const pageNumber5 = document.querySelector(".pageNumber5");
-//pageNumber5가 5일 때, next버튼을 누르면  678910
-
-
-//페이지네이션 함수
-function nextPage(){
-    pageNumber1.classList.add("grayColor");
-    pageNumber2.classList.remove("grayColor");
-    pageNumber3.classList.remove("grayColor");
-    pageNumber4.classList.remove("grayColor");
-    pageNumber5.classList.remove("grayColor");
-    if(pageNumber5.innerHTML == 5){
-        pageNumber1.innerHTML = 6;
-        pageNumber2.innerHTML = 7;
-        pageNumber3.innerHTML = 8;
-        pageNumber4.innerHTML = 9;
-        pageNumber5.innerHTML = 10;
-        console.log("2페이지");
-    }else if(pageNumber5.innerHTML == 10){
-        pageNumber1.innerHTML = 11;
-        pageNumber2.innerHTML = 12;
-        pageNumber3.innerHTML = 13;
-        pageNumber4.innerHTML = 14;
-        pageNumber5.innerHTML = 15;
-        console.log("3페이지");
-    }else if(pageNumber5.innerHTML == 15){
-        pageNumber1.innerHTML = 16;
-        pageNumber2.innerHTML = 17;
-        pageNumber3.innerHTML = 18;
-        pageNumber4.innerHTML = 19;
-        pageNumber5.innerHTML = 20;
-        console.log("4페이지");
-    }else if(pageNumber5.innerHTML == 20){
-        pageNumber1.innerHTML = 21;
-        pageNumber2.innerHTML = 22;
-        pageNumber3.innerHTML = 23;
-        pageNumber4.innerHTML = 24;
-        pageNumber5.innerHTML = 25;
-        console.log("5페이지");
-    }else if(pageNumber5.innerHTML == 25){
-        pageNumber1.innerHTML = 26;
-        pageNumber2.innerHTML = 27;
-        pageNumber3.innerHTML = 28;
-        pageNumber4.innerHTML = 29;
-        pageNumber5.innerHTML = 30;
-        console.log("6페이지");
-    }
-    else if(pageNumber5.innerHTML == 30){
-        pageNumber1.innerHTML = 31;
-        pageNumber2.innerHTML = 32;
-        pageNumber3.innerHTML = 33;
-        pageNumber4.innerHTML = 34;
-        pageNumber5.innerHTML = 35;
-        console.log("7페이지");
-    }else if(pageNumber5.innerHTML == 35){
-        pageNumber1.innerHTML = 36;
-        pageNumber2.innerHTML = 37;
-        pageNumber3.innerHTML = 38;
-        pageNumber4.innerHTML = 39;
-        pageNumber5.innerHTML = 40;
-        console.log("8페이지");
-    }
-
-}
-function beforePage(){
-    pageNumber1.classList.add("grayColor");
-    pageNumber2.classList.remove("grayColor");
-    pageNumber3.classList.remove("grayColor");
-    pageNumber4.classList.remove("grayColor");
-    pageNumber5.classList.remove("grayColor");
-    if(pageNumber5.innerHTML == 10){
-        pageNumber1.innerHTML = 1;
-        pageNumber2.innerHTML = 2;
-        pageNumber3.innerHTML = 3;
-        pageNumber4.innerHTML = 4;
-        pageNumber5.innerHTML = 5;
-        console.log("1페이지");
-    }else if(pageNumber5.innerHTML == 15){
-        pageNumber1.innerHTML = 6;
-        pageNumber2.innerHTML = 7;
-        pageNumber3.innerHTML = 8;
-        pageNumber4.innerHTML = 9;
-        pageNumber5.innerHTML = 10;
-        console.log("2페이지");
-    }else if(pageNumber5.innerHTML == 20){
-        pageNumber1.innerHTML = 11;
-        pageNumber2.innerHTML = 12;
-        pageNumber3.innerHTML = 13;
-        pageNumber4.innerHTML = 14;
-        pageNumber5.innerHTML = 15;
-        console.log("3페이지");
-    }else if(pageNumber5.innerHTML == 25){
-        pageNumber1.innerHTML = 16;
-        pageNumber2.innerHTML = 17;
-        pageNumber3.innerHTML = 18;
-        pageNumber4.innerHTML = 19;
-        pageNumber5.innerHTML = 20;
-        console.log("4페이지");
-    }else if(pageNumber5.innerHTML == 30){
-        pageNumber1.innerHTML = 21;
-        pageNumber2.innerHTML = 22;
-        pageNumber3.innerHTML = 23;
-        pageNumber4.innerHTML = 24;
-        pageNumber5.innerHTML = 25;
-        console.log("5페이지");
-    }else if(pageNumber5.innerHTML == 35){
-        pageNumber1.innerHTML = 26;
-        pageNumber2.innerHTML = 27;
-        pageNumber3.innerHTML = 28;
-        pageNumber4.innerHTML = 29;
-        pageNumber5.innerHTML = 30;
-        console.log("6페이지");
-    }
-    else if(pageNumber5.innerHTML == 40){
-        pageNumber1.innerHTML = 31;
-        pageNumber2.innerHTML = 32;
-        pageNumber3.innerHTML = 33;
-        pageNumber4.innerHTML = 34;
-        pageNumber5.innerHTML = 35;
-        console.log("7페이지");
-    }
-}
-
-//페이지숫자를 클릭하면 배경색이 회색으로 바뀌고 페이지가 바뀌는 함수
-function pageNumberGray(event){
-    let pages = ["pageNumber1", "pageNumber2", "pageNumber3", "pageNumber4", "pageNumber5"];
-    let pagesNumbers = [pageNumber1, pageNumber2, pageNumber3, pageNumber4, pageNumber5];
-    for(let i=0; i<5; i++){
-        if(event.target.classList[1] == pages[i]){
-            pagesNumbers[i].classList.add("grayColor");
-
-            //만약 이벤트 타겟이 아니고 클래스리스트에 회색이 있으면 -> 회색지우기
-            for(let e=0; e<5; e++){
-                if(pages[e] !== event.target.classList[1] && pagesNumbers[e].classList.contains("grayColor")){
-                    pagesNumbers[e].classList.remove("grayColor");
-                }
-            }
-        }
-    }
-
-
-
-    
-    if(pageNumber2.classList.contains("grayColor")){
-      const render = (element) => {
-        for (let i = 9; i > 4; i -= 1) {
-          element.prepend(convertToDiscussion(agoraStatesDiscussions[i]));
-        }
-        return;
-      };
-      const ul = document.querySelector("ul.discussions__container");
-      render(ul);
-    }else if(pageNumber1.classList.contains("grayColor")){
-      const render = (element) => {
-        for (let i = 4; i >= 0; i-=1) {
-          element.prepend(convertToDiscussion(agoraStatesDiscussions[i]));
-        }
-        return;
-      };
-      const ul = document.querySelector("ul.discussions__container");
-      render(ul);
-    }else if(pageNumber3.classList.contains("grayColor")){
-      const render = (element) => {
-        for (let i = 14; i > 9; i-=1) {
-          element.prepend(convertToDiscussion(agoraStatesDiscussions[i]));
-        }
-        return;
-      };
-      const ul = document.querySelector("ul.discussions__container");
-      render(ul);
-    }else if(pageNumber4.classList.contains("grayColor")){
-      const render = (element) => {
-        for (let i = 19; i > 14; i-=1) {
-          element.prepend(convertToDiscussion(agoraStatesDiscussions[i]));
-        }
-        return;
-      };
-      const ul = document.querySelector("ul.discussions__container");
-      render(ul);
-    }else if(pageNumber5.classList.contains("grayColor")){
-      const render = (element) => {
-        for (let i = 24; i > 19; i-=1) {
-          element.prepend(convertToDiscussion(agoraStatesDiscussions[i]));
-        }
-        return;
-      };
-      const ul = document.querySelector("ul.discussions__container");
-      render(ul);
-    }
-
-}
-
-//페이지숫자를 클릭하면 배경색이 회색으로 바뀌고 페이지가 바뀌는 이벤트
-arrowIconNext.addEventListener("click", nextPage);
-arrowIconBefore.addEventListener("click", beforePage);
-pageNumber1.addEventListener("click", pageNumberGray);
-pageNumber2.addEventListener("click", pageNumberGray);
-pageNumber3.addEventListener("click", pageNumberGray);
-pageNumber4.addEventListener("click", pageNumberGray);
-pageNumber5.addEventListener("click", pageNumberGray);
 
 
 
@@ -359,25 +171,13 @@ function submitClick(event){
   arr.bodyHTML = formText.value;
 
   let today = new Date();
-    let year = today.getFullYear();
-    let month = today.getMonth()+1;
-    let day = today.getDate();
-    let hours = today.getHours();
-    let minutes = today.getMinutes();
-    let seconds = today.getSeconds();
-    let date = year+"-"+(("00"+month.toString()).slice(-2))+"-"+(("00"+day.toString()).slice(-2))+"T"+hours+":"+minutes+":"+seconds+"Z";
-    arr.createdAt = date;
-  
-  //agoraStatesDiscussions.unshift(arr);
+  arr.createdAt = today;
   console.log(arr);
-  //localStorage.setItem("arrarr", JSON.stringify(arr));
-  console.log(agoraStatesDiscussions);
-  page1();
-  pageNumberGray(event);
-  //1번 화면으로 돌아오기
 
-  let inputAgoraDatas = [];
+
+
   let inputAgoraData = arr;
+  let inputAgoraDatas = [];
   // localStorage
   if (window.localStorage.length > 0) {
     const getInputAgoraDatas = window.localStorage.getItem('inputAgoraDatas');
@@ -416,21 +216,9 @@ const renderLocalStorage = (element) => {
   if (agoraDataObj) {
     for (let i = 0; i < agoraDataObj.length; i++) {
       element.prepend(convertToDiscussion(agoraDataObj[i]));
+      //console.log(agoraDataObj);
     }
   }
   return;
 }
 renderLocalStorage(ul);
-
-
-
-pageNumber1.addEventListener("click", page1);
-function page1(){
-  pageNumber1.classList.add("grayColor");
-  pageNumber2.classList.remove("grayColor");
-  pageNumber3.classList.remove("grayColor");
-  pageNumber4.classList.remove("grayColor");
-  pageNumber5.classList.remove("grayColor");
-}
-
-
